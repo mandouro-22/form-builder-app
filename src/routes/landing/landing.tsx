@@ -65,7 +65,7 @@ export default function Landing() {
           </p>
         </div>
 
-        <div className="grid grid-cols-4 gap-4 mt-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-10">
           {feature.map((item, index) => (
             <div className="bg-white px-4 py-8 rounded-lg shadow" key={index}>
               <div className="">{item.icon}</div>
@@ -117,8 +117,8 @@ export default function Landing() {
           </div>
 
           <p className="text-gray-300 text-md max-w-2xl">
-            © {new Date().getFullYear()} FormCraft. Built with React, Next.js,
-            and Tailwind CSS.
+            © {new Date().getFullYear()} FormCraft. Develop By Omar Mandour{" "}
+            {";)"}
           </p>
         </div>
       </section>
