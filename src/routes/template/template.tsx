@@ -60,7 +60,7 @@ function Page() {
 
   return (
     <div
-      className="!bg-white py-12 px-4"
+      className="bg-white py-12 px-4"
       style={{ height: "calc(100vh - 58px)" }}>
       <div className="container mx-auto">
         <div className="relative max-w-md">
