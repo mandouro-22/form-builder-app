@@ -10,6 +10,16 @@ import {
   Mail,
   MousePointer,
 } from "lucide-react";
+import {
+  DndContext,
+  DragOverlay,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import DraggableElement from "./_Component/draggable-element";
+import DroppableElement from "./_Component/droppable-element";
+import { useState } from "react";
+import { useFormStore, type FormElement } from "../../store/store";
 
 const formElements = [
   { id: "input", label: "Text Input", icon: Type },
@@ -29,46 +39,67 @@ export const Building = createRoute({
 });
 
 function Page() {
+  const { elements, addElement } = useFormStore();
+  const [isActive, setIsActive] = useState<string | null>(null);
+  const handleDragStart = (event: DragStartEvent) => {
+    setIsActive(event.active.id as string);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+    const elementType = active.id as string;
+    const data: FormElement = {
+      name: `${elementType}_${Date.now()}`,
+      position: { x: 0, y: elements.length * 80 },
+      placeholder: `Enter ${elementType}...`,
+      label: `${elementType.charAt(0).toUpperCase() + elementType.slice(1)}`,
+      is_required: false,
+
+      type: elementType,
+    };
+
+    if (elementType === "radio" || elementType === "select") {
+      data.options = ["option 1", "option 2", "option 3"];
+    }
+
+    return addElement(data);
+  };
+
   return (
     <div className="bg-white" style={{ height: "calc(100vh - 58px)" }}>
-      <div className="flex items-center h-full">
-        <div className="w-64 border-r border-gray-200 h-full p-4">
-          <div className="rounded-lg border border-gray-300 shadow p-6 bg-gray-100/50">
-            <div className="mb-6">
-              <h1 className="text-lg text-start font-medium">Form Element</h1>
-            </div>
+      <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+        <div className="flex items-center h-full overflow-hidden">
+          <div className="w-64 border-r border-gray-200 h-full p-4">
+            <div className="rounded-lg border border-gray-300 shadow p-6 bg-gray-100/50">
+              <div className="mb-6">
+                <h1 className="text-lg text-start font-medium">Form Element</h1>
+              </div>
 
-            <ul className="flex flex-col items-center gap-y-4">
-              {formElements.map((item) => (
-                <li
-                  key={item.id}
-                  className="w-40 mx-auto flex items-center justify-center gap-3 p-3 bg-white border border-gray-300 rounded-lg cursor-grab hover:shadow-md transition-shadow">
-                  <item.icon className="h-5 w-5 text-gray-600" />
-                  <p className="text-sm font-medium">{item.label}</p>
-                </li>
-              ))}
-            </ul>
+              <DraggableElement formElements={formElements} />
+            </div>
           </div>
-        </div>
-        <div className="flex-1 h-full p-6 overflow-auto">
-          <div className="border-2 border-dashed border-gray-300 min-h-full overflow-auto p-6 rounded-xl">
-            <div className="flex items-center flex-col justify-center gap-y-2 h-64 text-gray-500">
-              <h1 className="font-semibold text-lg">Drop form elements here</h1>
-              <p className="text-sm">
-                Drag elements from the sidebar to start building your form
+
+          <DroppableElement />
+
+          <div className="w-80 border-l border-gray-200 h-full p-4">
+            <div className="rounded-lg border border-gray-300 shadow p-6 flex flex-col gap-y-4 bg-gray-100/50">
+              <h1 className="font-medium text-xl">Properties</h1>
+              <p className="text-sm text-gray-600">
+                Select an element to edit its properties
               </p>
             </div>
           </div>
+
+          <DragOverlay>
+            {isActive ? (
+              <div className="bg-white border-2 border-blue-500 rounded-lg p-3 shadow-lg">
+                <div className="text-sm font-medium capitalize">{isActive}</div>
+              </div>
+            ) : null}
+          </DragOverlay>
         </div>
-        <div className="w-80 border-l border-gray-200 h-full p-4">
-          <div className="rounded-lg border border-gray-300 shadow p-6 flex flex-col gap-y-4 bg-gray-100/50">
-            <h1 className="font-medium text-xl">Properties</h1>
-            <p className="text-sm text-gray-600">
-              Select an element to edit its properties
-            </p>
-          </div>
-        </div>
-      </div>
+      </DndContext>
     </div>
   );
 }

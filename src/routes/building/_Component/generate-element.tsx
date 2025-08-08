@@ -1,0 +1,227 @@
+// import type { FormElement } from "../../../store/store";
+// import { FormElementWrapper } from "./form-element-wrapper";
+
+// export const reRenderElements = (
+//   elements: FormElement[],
+//   active: string | null,
+//   setActive: (value: string | null) => void,
+//   ButtonAction: (value: string) => React.ReactNode
+// ) => {
+//   return elements.map((e) => {
+//     switch (e.type) {
+//       case "input":
+//         return (
+//           <FormElementWrapper
+//             key={e.name}
+//             name={e.name}
+//             label={e.label}
+//             is_required={e.is_required}
+//             type={e.type}
+//             active={active}
+//             ButtonAction={ButtonAction}
+//             setActive={setActive}>
+//             <div className="mt-2">
+//               <input
+//                 type="text"
+//                 className="input py-2 px-4 w-full disabled:cursor-not-allowed"
+//                 placeholder={e.placeholder}
+//                 name={e.name}
+//                 required={e.is_required ? true : false}
+//                 disabled
+//               />
+//             </div>
+//           </FormElementWrapper>
+//         );
+
+//       case "textarea":
+//         return (
+//           <FormElementWrapper
+//             key={e.name}
+//             name={e.name}
+//             label={e.label}
+//             is_required={e.is_required}
+//             type={e.type}
+//             active={active}
+//             ButtonAction={ButtonAction}
+//             setActive={setActive}>
+//             <div className="mt-2">
+//               <textarea
+//                 className="input py-2 px-4 w-full disabled:cursor-not-allowed"
+//                 placeholder={e.placeholder}
+//                 name={e.name}
+//                 required={e.is_required ? true : false}
+//                 disabled
+//               />
+//             </div>
+//           </FormElementWrapper>
+//         );
+
+//       default:
+//         return null;
+//     }
+//   });
+// };
+
+import type { FormElement } from "../../../store/store";
+import { FormElementWrapper } from "./form-element-wrapper";
+
+export const reRenderElements = (
+  elements: FormElement[],
+  active: string | null,
+  setActive: (value: string | null) => void,
+  ButtonAction: (value: string) => React.ReactNode
+) => {
+  return elements.map((e) => {
+    switch (e.type) {
+      case "input":
+        return (
+          <FormElementWrapper
+            key={e.name}
+            name={e.name}
+            label={e.label}
+            is_required={e.is_required}
+            type={e.type}
+            active={active}
+            ButtonAction={ButtonAction}
+            setActive={setActive}>
+            <div className="mt-2">
+              <input
+                type="text"
+                className="input py-2 px-4 w-full disabled:cursor-not-allowed"
+                placeholder={e.placeholder}
+                name={e.name}
+                required={!!e.is_required}
+                disabled
+              />
+            </div>
+          </FormElementWrapper>
+        );
+
+      case "textarea":
+        return (
+          <FormElementWrapper
+            key={e.name}
+            name={e.name}
+            label={e.label}
+            is_required={e.is_required}
+            type={e.type}
+            active={active}
+            ButtonAction={ButtonAction}
+            setActive={setActive}>
+            <div className="mt-2">
+              <textarea
+                className="input py-2 px-4 w-full disabled:cursor-not-allowed"
+                placeholder={e.placeholder}
+                name={e.name}
+                required={!!e.is_required}
+                disabled
+              />
+            </div>
+          </FormElementWrapper>
+        );
+
+      case "checkbox":
+      case "radio":
+        return (
+          <FormElementWrapper
+            key={e.name}
+            name={e.name}
+            label={e.label}
+            is_required={e.is_required}
+            type={e.type}
+            active={active}
+            ButtonAction={ButtonAction}
+            setActive={setActive}>
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                type={e.type}
+                className="w-5 h-5 disabled:cursor-not-allowed"
+                name={e.name}
+                required={!!e.is_required}
+                disabled
+              />
+              <span className="text-gray-700">{e.placeholder}</span>
+            </div>
+          </FormElementWrapper>
+        );
+
+      case "select":
+        return (
+          <FormElementWrapper
+            key={e.name}
+            name={e.name}
+            label={e.label}
+            is_required={e.is_required}
+            type={e.type}
+            active={active}
+            ButtonAction={ButtonAction}
+            setActive={setActive}>
+            <div className="mt-2">
+              <select
+                className="input py-2 px-4 w-full disabled:cursor-not-allowed"
+                name={e.name}
+                required={!!e.is_required}
+                disabled>
+                {e.options?.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </FormElementWrapper>
+        );
+
+      case "date":
+      case "email":
+      case "number":
+        return (
+          <FormElementWrapper
+            key={e.name}
+            name={e.name}
+            label={e.label}
+            is_required={e.is_required}
+            type={e.type}
+            active={active}
+            ButtonAction={ButtonAction}
+            setActive={setActive}>
+            <div className="mt-2">
+              <input
+                type={e.type}
+                className="input py-2 px-4 w-full disabled:cursor-not-allowed"
+                placeholder={e.placeholder}
+                name={e.name}
+                required={!!e.is_required}
+                disabled
+              />
+            </div>
+          </FormElementWrapper>
+        );
+
+      case "button":
+        return (
+          <FormElementWrapper
+            key={e.name}
+            name={e.name}
+            label=""
+            is_required={false}
+            type={e.type}
+            active={active}
+            ButtonAction={ButtonAction}
+            setActive={setActive}>
+            <div className="mt-2">
+              <button
+                type="button"
+                className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50"
+                disabled>
+                {e.label}
+              </button>
+            </div>
+          </FormElementWrapper>
+        );
+
+      default:
+        return null;
+    }
+  });
+};

@@ -69,7 +69,7 @@ function Page() {
             type="search"
             placeholder="Search templates..."
             name="search"
-            className="pl-10 h-9 w-full rounded-lg border border-gray-200 outline-0 focus:border-black/50 focus-within:ring-3 focus-within:ring-gray-400 transition-all duration-150"
+            className="input pl-10 h-9 w-full "
           />
         </div>
         {templateCards && templateCards.length > 0 ? (
