@@ -12,6 +12,7 @@ export interface FormElement {
   label: string;
   type: string;
   options?: string[];
+  position_canva?: number;
   // | "input"
   // | "textarea"
   // | "checkbox"
@@ -24,13 +25,22 @@ export interface FormElement {
 
 interface FormBuilder {
   elements: FormElement[];
+  is_preview: boolean;
+  selectedElement: FormElement | null;
   addElement: (element: FormElement) => void;
+  selectElement: (element: FormElement | null) => void;
+  removeElement: (id: string) => void;
+  clearElements: () => void;
+  setProperties: () => void;
+  // updateElement: (id: string, updates: Partial<FormElement>) => void;
 }
 
-export const useFormStore = create<FormBuilder>((set) => ({
+export const useFormStore = create<FormBuilder>((set, get) => ({
   elements: [],
+  selectedElement: null,
+  is_preview: true,
 
-  addElement(element: FormElement) {
+  addElement(element) {
     const data: FormElement = {
       ...element,
       id: Date.now().toString(36).substring(2, 9),
@@ -40,4 +50,39 @@ export const useFormStore = create<FormBuilder>((set) => ({
       elements: [...state.elements, data],
     }));
   },
+
+  selectElement(element) {
+    if (element && element.id === "") return;
+    const filterElement = get().elements.find(
+      (item) => item.id === element?.id
+    );
+
+    set({
+      selectedElement: filterElement,
+    });
+  },
+
+  removeElement(id) {
+    if (!id) return;
+    const remove = get().elements.filter((item) => item.id !== id);
+
+    set({
+      elements: remove,
+    });
+  },
+
+  clearElements() {
+    set({
+      elements: [],
+      selectedElement: null,
+    });
+  },
+
+  setProperties() {
+    set((state) => ({
+      is_preview: !state.is_preview,
+    }));
+  },
+
+  // updateElement(id) {},
 }));

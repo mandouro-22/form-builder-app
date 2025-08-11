@@ -39,7 +39,7 @@ export const Building = createRoute({
 });
 
 function Page() {
-  const { elements, addElement } = useFormStore();
+  const { elements, addElement, is_preview, selectedElement } = useFormStore();
   const [isActive, setIsActive] = useState<string | null>(null);
   const handleDragStart = (event: DragStartEvent) => {
     setIsActive(event.active.id as string);
@@ -82,14 +82,22 @@ function Page() {
 
           <DroppableElement />
 
-          <div className="w-80 border-l border-gray-200 h-full p-4">
-            <div className="rounded-lg border border-gray-300 shadow p-6 flex flex-col gap-y-4 bg-gray-100/50">
-              <h1 className="font-medium text-xl">Properties</h1>
-              <p className="text-sm text-gray-600">
-                Select an element to edit its properties
-              </p>
+          {is_preview ? (
+            <div className="w-80 border-l border-gray-200 h-full p-4">
+              <div className="rounded-lg border border-gray-300 shadow p-6 flex flex-col gap-y-4 bg-gray-100/50">
+                {selectedElement ? (
+                  <div className="">{selectedElement.label}</div>
+                ) : (
+                  <div>
+                    <h1 className="font-medium text-xl">Properties</h1>
+                    <p className="text-sm text-gray-600">
+                      Select an element to edit its properties
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          ) : null}
 
           <DragOverlay>
             {isActive ? (

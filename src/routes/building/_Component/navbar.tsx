@@ -8,6 +8,7 @@ import {
   TrashIcon,
   UploadIcon,
 } from "lucide-react";
+import { useFormStore } from "../../../store/store";
 
 interface Props {
   templateLength: number;
@@ -47,6 +48,7 @@ const setting = [
 ];
 
 export default function Navbar({ templateLength = 0 }: Props) {
+  const { clearElements, setProperties } = useFormStore();
   return (
     <nav className="bg-white shadow-sm flex items-center flex-1 w-full border-b border-gray-200">
       <div className="w-full px-6 py-2 flex items-center justify-between">
@@ -72,9 +74,16 @@ export default function Navbar({ templateLength = 0 }: Props) {
           {setting.map((item) => (
             <div
               key={item.id}
-              className={`flex items-center gap-2 ${
+              className={`flex items-center gap-2 cursor-pointer ${
                 item.id === 6 ? "text-red-600 font-medium" : null
-              }`}>
+              }`}
+              onClick={() =>
+                item.id === 6
+                  ? clearElements()
+                  : item.id === 1
+                  ? setProperties()
+                  : null
+              }>
               {item.icon}
               <h4 className="text-base ">{item.name}</h4>
             </div>

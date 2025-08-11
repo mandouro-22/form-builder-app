@@ -1,87 +1,28 @@
-// import type { FormElement } from "../../../store/store";
-// import { FormElementWrapper } from "./form-element-wrapper";
-
-// export const reRenderElements = (
-//   elements: FormElement[],
-//   active: string | null,
-//   setActive: (value: string | null) => void,
-//   ButtonAction: (value: string) => React.ReactNode
-// ) => {
-//   return elements.map((e) => {
-//     switch (e.type) {
-//       case "input":
-//         return (
-//           <FormElementWrapper
-//             key={e.name}
-//             name={e.name}
-//             label={e.label}
-//             is_required={e.is_required}
-//             type={e.type}
-//             active={active}
-//             ButtonAction={ButtonAction}
-//             setActive={setActive}>
-//             <div className="mt-2">
-//               <input
-//                 type="text"
-//                 className="input py-2 px-4 w-full disabled:cursor-not-allowed"
-//                 placeholder={e.placeholder}
-//                 name={e.name}
-//                 required={e.is_required ? true : false}
-//                 disabled
-//               />
-//             </div>
-//           </FormElementWrapper>
-//         );
-
-//       case "textarea":
-//         return (
-//           <FormElementWrapper
-//             key={e.name}
-//             name={e.name}
-//             label={e.label}
-//             is_required={e.is_required}
-//             type={e.type}
-//             active={active}
-//             ButtonAction={ButtonAction}
-//             setActive={setActive}>
-//             <div className="mt-2">
-//               <textarea
-//                 className="input py-2 px-4 w-full disabled:cursor-not-allowed"
-//                 placeholder={e.placeholder}
-//                 name={e.name}
-//                 required={e.is_required ? true : false}
-//                 disabled
-//               />
-//             </div>
-//           </FormElementWrapper>
-//         );
-
-//       default:
-//         return null;
-//     }
-//   });
-// };
-
-import type { FormElement } from "../../../store/store";
+import { type FormElement } from "../../../store/store";
 import { FormElementWrapper } from "./form-element-wrapper";
 
-export const reRenderElements = (
+export const RenderElements = (
   elements: FormElement[],
   active: string | null,
   setActive: (value: string | null) => void,
-  ButtonAction: (value: string) => React.ReactNode
+  ButtonAction: (value: string, id: string) => React.ReactNode,
+  selectedElement: FormElement | null,
+  selectElement: (element: FormElement | null) => void
 ) => {
   return elements.map((e) => {
     switch (e.type) {
       case "input":
         return (
           <FormElementWrapper
+            id={e.id || ""}
             key={e.name}
             name={e.name}
             label={e.label}
             is_required={e.is_required}
             type={e.type}
             active={active}
+            selectElementFN={() => selectElement(e)}
+            selectedElement={selectedElement}
             ButtonAction={ButtonAction}
             setActive={setActive}>
             <div className="mt-2">
@@ -100,13 +41,16 @@ export const reRenderElements = (
       case "textarea":
         return (
           <FormElementWrapper
+            id={e.id || ""}
             key={e.name}
             name={e.name}
             label={e.label}
             is_required={e.is_required}
             type={e.type}
             active={active}
+            selectElementFN={() => selectElement(e)}
             ButtonAction={ButtonAction}
+            selectedElement={selectedElement}
             setActive={setActive}>
             <div className="mt-2">
               <textarea
@@ -124,12 +68,15 @@ export const reRenderElements = (
       case "radio":
         return (
           <FormElementWrapper
+            id={e.id || ""}
             key={e.name}
+            selectedElement={selectedElement}
             name={e.name}
             label={e.label}
             is_required={e.is_required}
             type={e.type}
             active={active}
+            selectElementFN={() => selectElement(e)}
             ButtonAction={ButtonAction}
             setActive={setActive}>
             <div className="mt-2 flex items-center gap-2">
@@ -148,11 +95,14 @@ export const reRenderElements = (
       case "select":
         return (
           <FormElementWrapper
+            id={e.id || ""}
             key={e.name}
             name={e.name}
             label={e.label}
             is_required={e.is_required}
             type={e.type}
+            selectElementFN={() => selectElement(e)}
+            selectedElement={selectedElement}
             active={active}
             ButtonAction={ButtonAction}
             setActive={setActive}>
@@ -160,8 +110,7 @@ export const reRenderElements = (
               <select
                 className="input py-2 px-4 w-full disabled:cursor-not-allowed"
                 name={e.name}
-                required={!!e.is_required}
-                disabled>
+                required={!!e.is_required}>
                 {e.options?.map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
@@ -177,9 +126,12 @@ export const reRenderElements = (
       case "number":
         return (
           <FormElementWrapper
+            id={e.id || ""}
             key={e.name}
             name={e.name}
             label={e.label}
+            selectElementFN={() => selectElement(e)}
+            selectedElement={selectedElement}
             is_required={e.is_required}
             type={e.type}
             active={active}
@@ -201,9 +153,12 @@ export const reRenderElements = (
       case "button":
         return (
           <FormElementWrapper
+            id={e.id || ""}
             key={e.name}
             name={e.name}
             label=""
+            selectElementFN={() => selectElement(e)}
+            selectedElement={selectedElement}
             is_required={false}
             type={e.type}
             active={active}
