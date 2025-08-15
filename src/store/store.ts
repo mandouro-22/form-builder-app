@@ -32,7 +32,7 @@ interface FormBuilder {
   removeElement: (id: string) => void;
   clearElements: () => void;
   setProperties: () => void;
-  // updateElement: (id: string, updates: Partial<FormElement>) => void;
+  updateElement: (id: string, updates: Partial<FormElement>) => void;
 }
 
 export const useFormStore = create<FormBuilder>((set, get) => ({
@@ -68,6 +68,7 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
 
     set({
       elements: remove,
+      selectedElement: null,
     });
   },
 
@@ -84,5 +85,17 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
     }));
   },
 
-  // updateElement(id) {},
+  updateElement(id, updates) {
+    set((state) => {
+      const isSelected = state.selectedElement?.id === id;
+      return {
+        elements: state.elements.map((item) =>
+          item.id === id ? { ...item, ...updates } : item
+        ),
+        selectedElement: isSelected
+          ? { ...state.selectedElement!, ...updates }
+          : state.selectedElement,
+      };
+    });
+  },
 }));

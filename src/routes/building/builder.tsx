@@ -20,6 +20,7 @@ import DraggableElement from "./_Component/draggable-element";
 import DroppableElement from "./_Component/droppable-element";
 import { useState } from "react";
 import { useFormStore, type FormElement } from "../../store/store";
+import PropertiePanel from "./_Component/propertie-panel";
 
 const formElements = [
   { id: "input", label: "Text Input", icon: Type },
@@ -44,7 +45,6 @@ function Page() {
   const handleDragStart = (event: DragStartEvent) => {
     setIsActive(event.active.id as string);
   };
-
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over) return;
@@ -59,7 +59,11 @@ function Page() {
       type: elementType,
     };
 
-    if (elementType === "radio" || elementType === "select") {
+    if (
+      elementType === "radio" ||
+      elementType === "select" ||
+      elementType === "checkbox"
+    ) {
       data.options = ["option 1", "option 2", "option 3"];
     }
 
@@ -86,7 +90,7 @@ function Page() {
             <div className="w-80 border-l border-gray-200 h-full p-4">
               <div className="rounded-lg border border-gray-300 shadow p-6 flex flex-col gap-y-4 bg-gray-100/50">
                 {selectedElement ? (
-                  <div className="">{selectedElement.label}</div>
+                  <PropertiePanel selectElement={selectedElement} />
                 ) : (
                   <div>
                     <h1 className="font-medium text-xl">Properties</h1>

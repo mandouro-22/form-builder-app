@@ -79,16 +79,18 @@ export const RenderElements = (
             selectElementFN={() => selectElement(e)}
             ButtonAction={ButtonAction}
             setActive={setActive}>
-            <div className="mt-2 flex items-center gap-2">
-              <input
-                type={e.type}
-                className="w-5 h-5 disabled:cursor-not-allowed"
-                name={e.name}
-                required={!!e.is_required}
-                disabled
-              />
-              <span className="text-gray-700">{e.placeholder}</span>
-            </div>
+            {e.options?.map((opt) => (
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type={e.type}
+                  className="w-5 h-5 disabled:cursor-not-allowed"
+                  name={e.name}
+                  required={!!e.is_required}
+                  disabled
+                />
+                <span className="text-gray-700">{opt}</span>
+              </div>
+            ))}
           </FormElementWrapper>
         );
 
@@ -110,7 +112,8 @@ export const RenderElements = (
               <select
                 className="input py-2 px-4 w-full disabled:cursor-not-allowed"
                 name={e.name}
-                required={!!e.is_required}>
+                required={!!e.is_required}
+                disabled>
                 {e.options?.map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
@@ -164,14 +167,12 @@ export const RenderElements = (
             active={active}
             ButtonAction={ButtonAction}
             setActive={setActive}>
-            <div className="mt-2">
-              <button
-                type="button"
-                className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50"
-                disabled>
-                {e.label}
-              </button>
-            </div>
+            <button
+              type="button"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50 w-fit"
+              disabled>
+              {e.label}
+            </button>
           </FormElementWrapper>
         );
 

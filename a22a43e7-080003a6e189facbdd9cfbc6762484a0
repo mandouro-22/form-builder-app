@@ -1,9 +1,0 @@
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/building/_Component/generate-element')({
-  component: RouteComponent,
-})
-
-function RouteComponent() {
-  return <div>Hello "/building/_Component/generate-element"!</div>
-}

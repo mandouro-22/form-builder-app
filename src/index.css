@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
-.boldonse-regular {
-  font-family: "Boldonse", system-ui;
+.geist-regular {
+  font-family: "Geist", sans-serif;
+  font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
 }

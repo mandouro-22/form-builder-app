@@ -5,11 +5,15 @@ import { Template } from "./routes/template/template";
 import { LayoutLanding } from "./routes/landing/layout";
 import { BuildingLayout } from "./routes/building/layout";
 import { Building } from "./routes/building/builder";
+import { AuthLayout } from "./routes/auth/layout";
+import { SignUp } from "./routes/auth/sign-up";
+import { Login } from "./routes/auth/login";
 
 const routeTree = Root.addChildren([
   LayoutLanding,
   LayoutTemplate.addChildren([Template]),
   BuildingLayout.addChildren([Building]),
+  AuthLayout.addChildren([SignUp, Login]),
 ]);
 const router = createRouter({ routeTree });
 

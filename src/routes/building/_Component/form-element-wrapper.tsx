@@ -41,9 +41,10 @@ export const FormElementWrapper = memo(
                      }
         `}
         onMouseEnter={() => setActive(type)}
-        onMouseLeave={() => setActive(null)}>
+        onMouseLeave={() => setActive(null)}
+        onClick={selectElementFN}>
         {active === type ? ButtonAction(type, id) : null}
-        <div className="flex items-center gap-2" onClick={selectElementFN}>
+        <div className="flex items-center gap-2">
           <label htmlFor={name} className="font-semibold text-lg text-gray-900">
             {label}
           </label>
