@@ -1,4 +1,6 @@
-import { createRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { auth, db } from "../../firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { AuthLayout } from "./layout";
 import { useForm } from "react-hook-form";
 import { register } from "../../api/api";
@@ -7,6 +9,9 @@ import {
   registerSchema,
   type RegisterFormValues,
 } from "../../validations/auth";
+import { createRoute, Link, useNavigate } from "@tanstack/react-router";
+import { doc, setDoc } from "firebase/firestore";
+import { Loader2Icon } from "lucide-react";
 
 export const SignUp = createRoute({
   getParentRoute: () => AuthLayout,
@@ -15,6 +20,8 @@ export const SignUp = createRoute({
 });
 
 function Page() {
+  const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     mode: "onChange",
@@ -26,8 +33,41 @@ function Page() {
       confirmPassword: "",
     },
   });
-  const handleRegisterSubmit = (value: RegisterFormValues) => {
-    console.log(value);
+  const handleRegisterSubmit = async (value: RegisterFormValues) => {
+    setLoading(true);
+    try {
+      if (!value) return;
+
+      // create account
+      const credential = await createUserWithEmailAndPassword(
+        auth,
+        value.email,
+        value.password
+      );
+
+      const user = credential.user;
+
+      const newUser = {
+        fullName: value.fullName,
+        email: user.email,
+        username: value.username,
+      };
+
+      // save user in Firestore
+      await setDoc(doc(db, "users", user.uid), newUser);
+      const idToken = await credential.user.getIdToken();
+      // add token in the localstorage.
+      sessionStorage.setItem("token", idToken);
+
+      navigate({
+        to: "/",
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Registration error:", error.message || error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -67,8 +107,13 @@ function Page() {
 
           <button
             type="submit"
-            className="btn bg-cyan-700 w-full font-medium text-white">
-            Create Account
+            className="btn bg-cyan-700 w-full font-medium text-white flex items-center justify-center"
+            disabled={loading}>
+            {loading ? (
+              <Loader2Icon className="size-6 animate-spin" />
+            ) : (
+              "Create Account"
+            )}
           </button>
         </form>
 

@@ -1,5 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,6 +14,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 let analytics: Analytics | undefined;
 if (typeof window !== "undefined" && firebaseConfig.measurementId) {
@@ -22,4 +26,4 @@ if (typeof window !== "undefined" && firebaseConfig.measurementId) {
   });
 }
 
-export { app, analytics };
+export { app, auth, db, analytics };

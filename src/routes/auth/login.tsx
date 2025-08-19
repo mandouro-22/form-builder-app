@@ -1,9 +1,13 @@
-import { createRoute, Link } from "@tanstack/react-router";
+import { createRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AuthLayout } from "./layout";
-import { login } from "../../api/api";
+import { login as loginFields } from "../../api/api";
 import { useForm } from "react-hook-form";
 import { loginSchema, type LoginFormValues } from "../../validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2Icon } from "lucide-react";
+import { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase";
 
 export const Login = createRoute({
   getParentRoute: () => AuthLayout,
@@ -12,6 +16,8 @@ export const Login = createRoute({
 });
 
 function Page() {
+  const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: "onChange",
@@ -20,9 +26,26 @@ function Page() {
       password: "",
     },
   });
+  const handleSubmitLogin = async (value: LoginFormValues) => {
+    setLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        value.email,
+        value.password
+      );
 
-  const handleSubmitLogin = (value: LoginFormValues) => {
-    console.log(value);
+      if (userCredential.user) {
+        const idToken = await userCredential.user.getIdToken();
+        sessionStorage.setItem("token", idToken);
+        navigate({ to: "/" });
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Login error:", error.message || error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,7 +59,7 @@ function Page() {
         <form
           onSubmit={form.handleSubmit(handleSubmitLogin)}
           className="space-y-3 mt-3">
-          {login.map((field, index) => (
+          {loginFields.map((field, index) => (
             <div key={index} className="flex flex-col gap-y-2">
               <label htmlFor={field.name} className="font-medium text-gray-800">
                 {field.label}
@@ -62,8 +85,13 @@ function Page() {
 
           <button
             type="submit"
-            className="btn bg-cyan-700 w-full font-medium text-white">
-            Login
+            className="btn bg-cyan-700 w-full font-medium text-white flex items-center justify-center"
+            disabled={loading}>
+            {loading ? (
+              <Loader2Icon className="size-6 animate-spin" />
+            ) : (
+              "Login"
+            )}
           </button>
         </form>
 
