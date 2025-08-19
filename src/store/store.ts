@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { auth, db } from "../firebase";
+import { addDoc, collection } from "firebase/firestore";
 
 export interface FormElement {
   id?: string;
@@ -33,6 +35,7 @@ interface FormBuilder {
   clearElements: () => void;
   setProperties: () => void;
   updateElement: (id: string, updates: Partial<FormElement>) => void;
+  addTemplate: (name: string, description?: string) => void;
 }
 
 export const useFormStore = create<FormBuilder>((set, get) => ({
@@ -97,5 +100,22 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
           : state.selectedElement,
       };
     });
+  },
+
+  async addTemplate(name, description) {
+    const userId = auth.currentUser?.uid;
+    const elements = get().elements;
+    if (!name || !userId || !elements) return;
+
+    const newForm = {
+      userId: userId,
+      templateName: name,
+      description: description || "",
+      elements: elements,
+      createdAt: new Date(),
+    };
+
+    const data = await addDoc(collection(db, "templates"), newForm);
+    return data;
   },
 }));

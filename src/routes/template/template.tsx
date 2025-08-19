@@ -7,8 +7,10 @@ import {
   SearchIcon,
   TrashIcon,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Model from "../../components/model";
+import { auth, db } from "../../firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 const templateCards = [
   {
@@ -57,7 +59,22 @@ function Page() {
   const handleClose = useCallback(() => {
     return setOpen(null);
   }, []);
+  const userId = auth.currentUser?.uid;
 
+  useEffect(() => {
+    async function getTemp() {
+      const q = query(
+        collection(db, "templates"),
+        where("userId", "==", userId) // لو عندك field اسمه userId
+      );
+
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        console.log(doc.id, " => ", doc.data());
+      });
+    }
+    getTemp();
+  }, [userId]);
   return (
     <div
       className="bg-white py-12 px-4"

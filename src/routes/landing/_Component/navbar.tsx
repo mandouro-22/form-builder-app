@@ -17,7 +17,7 @@ export default function Navbar() {
             className="btn bg-cyan-800 font-semibold text-white">
             Template
           </Link>
-          {!token ? <AuthBtn /> : null}
+          <AuthBtn status={token ? "out" : "sign"} />
         </div>
       </div>
     </nav>
