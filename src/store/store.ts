@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { auth, db } from "../firebase";
 import { addDoc, collection } from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid";
 
 export interface FormElement {
   id?: string;
@@ -23,6 +24,15 @@ export interface FormElement {
   // | "date"
   // | "email"
   // | "button";
+}
+
+export interface TempData {
+  id: string;
+  templateName: string;
+  description: string;
+  userId: string;
+  elements: FormElement[];
+  createdAt: string;
 }
 
 interface FormBuilder {
@@ -108,6 +118,7 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
     if (!name || !userId || !elements) return;
 
     const newForm = {
+      id: uuidv4(),
       userId: userId,
       templateName: name,
       description: description || "",

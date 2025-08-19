@@ -24,10 +24,6 @@ const templateSchema = z.object({
 
 type TemplateFormData = z.infer<typeof templateSchema>;
 
-interface Props {
-  templateLength: number;
-}
-
 const setting = [
   {
     id: 1,
@@ -182,8 +178,8 @@ function SaveTemplateModel({ onClose }: SaveTemplateModelProps) {
   );
 }
 
-export default function Navbar({ templateLength = 0 }: Props) {
-  const { clearElements, setProperties } = useFormStore();
+export default function Navbar() {
+  const { clearElements, setProperties, elements } = useFormStore();
   const [open, setOpen] = useState(false);
 
   return (
@@ -202,8 +198,8 @@ export default function Navbar({ templateLength = 0 }: Props) {
           </div>
 
           <div className="hidden sm:flex items-center gap-1 text-xs text-gray-900 font-medium">
-            <span>{templateLength}</span>
-            <p>templates</p>
+            <span>{elements.length}</span>
+            <p>element</p>
           </div>
         </div>
 

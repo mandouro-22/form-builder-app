@@ -10,7 +10,7 @@ export const BuildingLayout = createRoute({
     if (!token) return <Navigate to="/auth/login" />;
     return (
       <>
-        <Navbar templateLength={0} />
+        <Navbar />
         <Outlet />
       </>
     );

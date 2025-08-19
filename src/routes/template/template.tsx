@@ -11,41 +11,8 @@ import { useCallback, useEffect, useState } from "react";
 import Model from "../../components/model";
 import { auth, db } from "../../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
-
-const templateCards = [
-  {
-    id: 1,
-    name: "Omar Mandour",
-    content:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis deserunt impedit quam.",
-    numOfElements: 3,
-    create_at: new Date(),
-  },
-  {
-    id: 2,
-    name: "Omar Mandour",
-    content:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis deserunt impedit quam.",
-    numOfElements: 3,
-    create_at: new Date(),
-  },
-  {
-    id: 3,
-    name: "Omar Mandour",
-    content:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis deserunt impedit quam.",
-    numOfElements: 3,
-    create_at: new Date(),
-  },
-  {
-    id: 4,
-    name: "Omar Mandour",
-    content:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis deserunt impedit quam.",
-    numOfElements: 3,
-    create_at: new Date(),
-  },
-];
+import { onAuthStateChanged } from "firebase/auth";
+import type { TempData } from "../../store/store";
 
 export const Template = createRoute({
   getParentRoute: () => LayoutTemplate,
@@ -54,27 +21,36 @@ export const Template = createRoute({
 });
 
 function Page() {
-  const [open, setOpen] = useState<number | null>(null);
-
+  const [open, setOpen] = useState<string | null>(null);
+  const [temp, setTemp] = useState<TempData[]>([]);
   const handleClose = useCallback(() => {
     return setOpen(null);
   }, []);
-  const userId = auth.currentUser?.uid;
 
   useEffect(() => {
-    async function getTemp() {
-      const q = query(
-        collection(db, "templates"),
-        where("userId", "==", userId) // لو عندك field اسمه userId
-      );
+    const unSubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userId = user.uid;
 
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        console.log(doc.id, " => ", doc.data());
-      });
-    }
-    getTemp();
-  }, [userId]);
+        const q = query(
+          collection(db, "templates"),
+          where("userId", "==", userId)
+        );
+        const querySnapShot = await getDocs(q);
+        const templatesData: TempData[] = [];
+        querySnapShot.forEach((doc) => {
+          const data = doc.data() as TempData;
+          templatesData.push(data);
+        });
+        setTemp(templatesData);
+      } else {
+        console.error("no user sign in");
+      }
+    });
+    return () => unSubscribe();
+  }, []);
+
+  console.log(temp);
   return (
     <div
       className="bg-white py-12 px-4"
@@ -89,28 +65,28 @@ function Page() {
             className="input pl-10 h-9 w-full "
           />
         </div>
-        {templateCards && templateCards.length > 0 ? (
+        {temp && temp.length > 0 ? (
           <div className="grid gird-cols-1 sm:grid-cols-2 md:grid-col-3 lg:grid-cols-4 gap-4 my-6">
-            {templateCards.map((temp) => (
+            {temp.map((temp) => (
               <div
                 className="border border-gray-200 shadow rounded-lg px-4 py-6"
                 key={temp.id}>
                 <div className="my-1">
-                  <h1 className="text-lg font-semibold text-gray-900 mb-2">
-                    {temp.name}
+                  <h1 className="text-lg font-semibold text-gray-900 mb-2 capitalize">
+                    {temp.templateName}
                   </h1>
                   <p className="max-w-md text-gray-600 text-sm">
-                    {temp.content}
+                    {temp.description || "Not Found"}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-x-2 my-2">
                   <p className="bg-gray-200/50 rounded-xl px-4 text-xs py-[1px] border border-gray-400">
-                    {temp.numOfElements} Elements
+                    {temp.elements.length} Elements
                   </p>
                   <p className="text-gray-700">•</p>
                   <p className="text-base text-gray-700 font-medium">
-                    {temp.create_at.toLocaleDateString("EG")}
+                    {new Date(temp.createdAt).toDateString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 mt-6">
