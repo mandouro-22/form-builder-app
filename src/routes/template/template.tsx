@@ -1,5 +1,6 @@
-import { createRoute, Link } from "@tanstack/react-router";
+import { createRoute, Link, useNavigate } from "@tanstack/react-router";
 import { LayoutTemplate } from "./layout";
+import { formatDate } from "../../lib/format-date-";
 import {
   EyeIcon,
   PenBoxIcon,
@@ -7,12 +8,20 @@ import {
   SearchIcon,
   TrashIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Model from "../../components/model";
 import { auth, db } from "../../firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import type { TempData } from "../../store/store";
+import { useFormStore, type TempData } from "../../store/store";
+import { debounce } from "lodash";
 
 export const Template = createRoute({
   getParentRoute: () => LayoutTemplate,
@@ -22,35 +31,74 @@ export const Template = createRoute({
 
 function Page() {
   const [open, setOpen] = useState<string | null>(null);
+  const [search, setSearch] = useState<string>("");
   const [temp, setTemp] = useState<TempData[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string>("");
+  const navigate = useNavigate();
+  const { addPreview } = useFormStore();
+
   const handleClose = useCallback(() => {
     return setOpen(null);
   }, []);
 
+  const cacheRef = useRef<Map<string, TempData[]>>(new Map());
+
+  const OnDelete = async (id: string) => {
+    try {
+      if (!userId && !id) return;
+
+      await deleteDoc(doc(db, "templates", id)).then(() => {
+        setTemp((prev) => prev.filter((item) => item.templateId !== id));
+        setOpen(null);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
+    setLoading(true);
     const unSubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const userId = user.uid;
+        setUserId(userId);
+        const cacheKey = `${userId}-${search || ""}`;
+        if (cacheRef.current.has(cacheKey)) {
+          setTemp(cacheRef.current.get(cacheKey) as TempData[]);
+          setLoading(false);
+          return;
+        }
 
-        const q = query(
-          collection(db, "templates"),
-          where("userId", "==", userId)
-        );
-        const querySnapShot = await getDocs(q);
+        const queryConstraints = [where("userId", "==", userId)];
+        if (search) {
+          queryConstraints.push(where("templateName", "==", search));
+        }
+
+        const q = query(collection(db, "templates"), ...queryConstraints);
+        const querySnapshot = await getDocs(q);
         const templatesData: TempData[] = [];
-        querySnapShot.forEach((doc) => {
+        querySnapshot.forEach((doc) => {
           const data = doc.data() as TempData;
           templatesData.push(data);
         });
+        cacheRef.current.set(cacheKey, templatesData);
+        console.log(templatesData);
         setTemp(templatesData);
+        setLoading(false);
       } else {
+        setLoading(false);
         console.error("no user sign in");
       }
     });
-    return () => unSubscribe();
-  }, []);
 
-  console.log(temp);
+    const debounces = debounce(unSubscribe, 500);
+
+    return () => {
+      debounces();
+    };
+  }, [search]);
+
   return (
     <div
       className="bg-white py-12 px-4"
@@ -60,12 +108,20 @@ function Page() {
           <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <input
             type="search"
-            placeholder="Search templates..."
+            placeholder="Search templates name..."
             name="search"
-            className="input pl-10 h-9 w-full "
+            className="input pl-10 h-9 w-full"
+            value={search}
+            onChange={(e) => setSearch(e.target.value.toLowerCase())}
           />
         </div>
-        {temp && temp.length > 0 ? (
+        {loading ? (
+          <div className="my-4">
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-800">
+              Loading Templates...
+            </h1>
+          </div>
+        ) : temp && temp.length > 0 ? (
           <div className="grid gird-cols-1 sm:grid-cols-2 md:grid-col-3 lg:grid-cols-4 gap-4 my-6">
             {temp.map((temp) => (
               <div
@@ -86,7 +142,7 @@ function Page() {
                   </p>
                   <p className="text-gray-700">•</p>
                   <p className="text-base text-gray-700 font-medium">
-                    {new Date(temp.createdAt).toDateString()}
+                    {formatDate(temp.createdAt)}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 mt-6">
@@ -96,11 +152,21 @@ function Page() {
                     <PenBoxIcon className="size-4" />
                     Edit
                   </Link>
-                  <div className="border border-gray-300 h-7 w-8 rounded-md flex items-center justify-center">
+                  <button
+                    type="button"
+                    className="border border-gray-300 h-7 w-8 rounded-md flex items-center justify-center"
+                    onClick={() => {
+                      if (temp.elements.length > 0) {
+                        addPreview(temp.elements);
+                      }
+                      navigate({
+                        to: "/preview",
+                      });
+                    }}>
                     <EyeIcon className="size-4" />
-                  </div>
+                  </button>
                   <div
-                    onClick={() => setOpen(temp.id)}
+                    onClick={() => setOpen(temp.templateId)}
                     className="border border-red-300 h-7 w-8 rounded-md flex items-center justify-center text-red-400 hover:border-red-500 hover:text-red-600 transition-all duration-150">
                     <TrashIcon className="size-4" />
                   </div>
@@ -132,6 +198,7 @@ function Page() {
           title="Delete Template"
           content="Are you sure you want to delete 'Omar Mandour'? This action cannot be undone."
           isClose={handleClose}
+          onDelete={() => OnDelete(open)}
         />
       ) : null}
     </div>

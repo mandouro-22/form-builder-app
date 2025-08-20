@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { auth, db } from "../firebase";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, updateDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
+import { router } from "../routes/router";
 
 export interface FormElement {
   id?: string;
@@ -33,11 +34,13 @@ export interface TempData {
   userId: string;
   elements: FormElement[];
   createdAt: string;
+  templateId: string;
 }
 
 interface FormBuilder {
   elements: FormElement[];
   is_preview: boolean;
+  preview: FormElement[];
   selectedElement: FormElement | null;
   addElement: (element: FormElement) => void;
   selectElement: (element: FormElement | null) => void;
@@ -46,12 +49,14 @@ interface FormBuilder {
   setProperties: () => void;
   updateElement: (id: string, updates: Partial<FormElement>) => void;
   addTemplate: (name: string, description?: string) => void;
+  addPreview: (element: FormElement[]) => void;
 }
 
 export const useFormStore = create<FormBuilder>((set, get) => ({
   elements: [],
   selectedElement: null,
   is_preview: true,
+  preview: [],
 
   addElement(element) {
     const data: FormElement = {
@@ -62,6 +67,16 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
     set((state) => ({
       elements: [...state.elements, data],
     }));
+  },
+
+  addPreview(value) {
+    set({
+      preview: value,
+    });
+
+    router.navigate({
+      to: "/preview",
+    });
   },
 
   selectElement(element) {
@@ -127,6 +142,8 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
     };
 
     const data = await addDoc(collection(db, "templates"), newForm);
+    await updateDoc(data, { templateId: data.id });
+
     return data;
   },
 }));

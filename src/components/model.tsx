@@ -4,9 +4,10 @@ interface Props {
   title: string;
   content: string;
   isClose: () => void;
+  onDelete: () => void;
 }
 
-export default function Model({ title, content, isClose }: Props) {
+export default function Model({ title, content, isClose, onDelete }: Props) {
   return (
     <>
       <div
@@ -35,7 +36,8 @@ export default function Model({ title, content, isClose }: Props) {
           </button>
           <button
             type="button"
-            className="btn bg-red-500 text-white font-semibold">
+            className="btn bg-red-500 text-white font-semibold"
+            onClick={onDelete}>
             Delete
           </button>
         </div>

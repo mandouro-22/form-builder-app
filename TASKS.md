@@ -20,7 +20,7 @@
 #### Planned/Unfinished Tasks
 
 - [x] Bind actual authentication using Firebase Auth (register/signup/signout) and bind buttons in the interface
-- [ ] Save form as a template from the Create page and store it in a database
+- [x] Save form as a template from the Create page and store it in a database
 - [ ] Templates page: Read templates from the database, enable search, delete/modify Actual
 - [ ] Open a template for editing in the builder page (Edit existing template)
 - [ ] Export the template: as a JSON file and generate a PDF

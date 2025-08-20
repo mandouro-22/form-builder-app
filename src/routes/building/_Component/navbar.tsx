@@ -62,7 +62,7 @@ interface SaveTemplateModelProps {
 }
 
 function SaveTemplateModel({ onClose }: SaveTemplateModelProps) {
-  const { addTemplate } = useFormStore();
+  const { addTemplate, clearElements } = useFormStore();
   const navigate = useNavigate();
   const {
     register,
@@ -81,7 +81,7 @@ function SaveTemplateModel({ onClose }: SaveTemplateModelProps) {
     try {
       console.log("Saving template:", data);
       await addTemplate(data.templateName, data.description);
-
+      clearElements();
       navigate({
         to: "/template",
       });
@@ -179,7 +179,7 @@ function SaveTemplateModel({ onClose }: SaveTemplateModelProps) {
 }
 
 export default function Navbar() {
-  const { clearElements, setProperties, elements } = useFormStore();
+  const { clearElements, setProperties, elements, addPreview } = useFormStore();
   const [open, setOpen] = useState(false);
 
   return (
@@ -215,6 +215,8 @@ export default function Navbar() {
                   ? clearElements()
                   : item.id === 1
                   ? setProperties()
+                  : item.id === 2
+                  ? addPreview(elements)
                   : item.id === 3
                   ? setOpen(true)
                   : null
