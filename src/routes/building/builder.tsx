@@ -1,5 +1,3 @@
-import { createRoute } from "@tanstack/react-router";
-import { BuildingLayout } from "./layout";
 import {
   Type,
   AlignLeft,
@@ -33,13 +31,7 @@ const formElements = [
   { id: "button", label: "Button", icon: MousePointer },
 ];
 
-export const Building = createRoute({
-  getParentRoute: () => BuildingLayout,
-  path: "/",
-  component: Page,
-});
-
-function Page() {
+export const Building = () => {
   const { elements, addElement, is_preview, selectedElement } = useFormStore();
   const [isActive, setIsActive] = useState<string | null>(null);
   const handleDragStart = (event: DragStartEvent) => {
@@ -114,4 +106,4 @@ function Page() {
       </DndContext>
     </div>
   );
-}
+};

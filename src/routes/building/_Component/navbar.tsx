@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
   DownloadIcon,
@@ -24,46 +24,14 @@ const templateSchema = z.object({
 
 type TemplateFormData = z.infer<typeof templateSchema>;
 
-const setting = [
-  {
-    id: 1,
-    name: "Properties",
-    icon: <SettingsIcon className="size-4" />,
-  },
-  {
-    id: 2,
-    name: "Preview",
-    icon: <EyeIcon className="size-4" />,
-  },
-  {
-    id: 3,
-    name: "Save",
-    icon: <SaveIcon className="size-4" />,
-  },
-  {
-    id: 4,
-    name: "Export",
-    icon: <DownloadIcon className="size-4" />,
-  },
-  {
-    id: 5,
-    name: "Import",
-    icon: <UploadIcon className="size-4" />,
-  },
-  {
-    id: 6,
-    name: "Clear",
-    icon: <TrashIcon className="size-4" />,
-  },
-];
-
 interface SaveTemplateModelProps {
   onClose: () => void;
+  mode: "create" | "update";
 }
 
-function SaveTemplateModel({ onClose }: SaveTemplateModelProps) {
-  const { addTemplate, clearElements } = useFormStore();
-  const navigate = useNavigate();
+function SaveOrUpdateTemplateModel({ onClose, mode }: SaveTemplateModelProps) {
+  const { addTemplate, clearElements, currentTemp, updateTemp } =
+    useFormStore();
   const {
     register,
     handleSubmit,
@@ -72,19 +40,27 @@ function SaveTemplateModel({ onClose }: SaveTemplateModelProps) {
   } = useForm<TemplateFormData>({
     resolver: zodResolver(templateSchema),
     defaultValues: {
-      templateName: "",
-      description: "",
+      templateName: mode === "update" ? currentTemp?.templateName : "",
+      description: mode === "update" ? currentTemp?.description || "" : "",
     },
   });
 
   const onSubmit = async (data: TemplateFormData) => {
     try {
       console.log("Saving template:", data);
-      await addTemplate(data.templateName, data.description);
+
+      if (mode === "create") {
+        await addTemplate(data.templateName, data.description);
+      } else if (mode === "update") {
+        updateTemp(
+          data.templateName,
+          data.description || "",
+          currentTemp?.templateId || ""
+        );
+      }
+
       clearElements();
-      navigate({
-        to: "/template",
-      });
+
       reset();
       onClose();
     } catch (error) {
@@ -169,7 +145,13 @@ function SaveTemplateModel({ onClose }: SaveTemplateModelProps) {
               type="submit"
               disabled={isSubmitting}
               className="button px-4 py-2 text-sm cursor-pointer font-medium bg-cyan-600 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
-              {isSubmitting ? "Saving..." : "Save Template"}
+              {mode === "create"
+                ? isSubmitting
+                  ? "Saving..."
+                  : "Save Template"
+                : isSubmitting
+                ? "Updateing..."
+                : "Update Template"}
             </button>
           </div>
         </form>
@@ -179,8 +161,42 @@ function SaveTemplateModel({ onClose }: SaveTemplateModelProps) {
 }
 
 export default function Navbar() {
-  const { clearElements, setProperties, elements, addPreview } = useFormStore();
+  const { clearElements, setProperties, elements, addPreview, isEditTemp } =
+    useFormStore();
   const [open, setOpen] = useState(false);
+  console.log(isEditTemp);
+  const setting = [
+    {
+      id: 1,
+      name: "Properties",
+      icon: <SettingsIcon className="size-4" />,
+    },
+    {
+      id: 2,
+      name: "Preview",
+      icon: <EyeIcon className="size-4" />,
+    },
+    {
+      id: 3,
+      name: isEditTemp ? "Update" : "Save",
+      icon: <SaveIcon className="size-4" />,
+    },
+    {
+      id: 4,
+      name: "Export",
+      icon: <DownloadIcon className="size-4" />,
+    },
+    {
+      id: 5,
+      name: "Import",
+      icon: <UploadIcon className="size-4" />,
+    },
+    {
+      id: 6,
+      name: "Clear",
+      icon: <TrashIcon className="size-4" />,
+    },
+  ];
 
   return (
     <nav className="bg-white shadow-sm flex items-center flex-1 w-full border-b border-gray-200">
@@ -228,7 +244,12 @@ export default function Navbar() {
         </div>
       </div>
 
-      {open ? <SaveTemplateModel onClose={() => setOpen(false)} /> : null}
+      {open ? (
+        <SaveOrUpdateTemplateModel
+          onClose={() => setOpen(false)}
+          mode={"update"}
+        />
+      ) : null}
     </nav>
   );
 }

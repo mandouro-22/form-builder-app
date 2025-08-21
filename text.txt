@@ -54,7 +54,7 @@ interface FormBuilder {
   startEditTemp: () => void;
   closeEditTemp: () => void;
   selectTemplate: (templateId: string) => void;
-  updateTemp: (name: string, description: string, templateId: string) => void;
+  updateTemp: () => void;
   deleteTemp: (id: string) => void;
   addElement: (element: FormElement) => void;
   selectElement: (element: FormElement | null) => void;
@@ -96,7 +96,6 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
 
     set({
       currentTemp: temp,
-      elements: temp?.elements,
     });
   },
 
@@ -190,12 +189,12 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
     };
 
     const data = await addDoc(collection(db, "templates"), newForm);
-    await updateDoc(data, { templateId: data.id }).then(() => {
-      router.navigate({ to: "/template" });
-    });
+    await updateDoc(data, { templateId: data.id });
 
     return data;
   },
+
+  updateTemp() {},
 
   async deleteTemp(id) {
     if (!id) return;
@@ -214,35 +213,5 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
     } catch (error) {
       console.error(error);
     }
-  },
-
-  async updateTemp(name, description, templateId) {
-    if (!name || !description || !templateId) return;
-    const elements = get().elements;
-    const temp = get().templates.map((item) =>
-      item.templateId === templateId
-        ? { ...item, templateName: name, description, elements: elements }
-        : item
-    );
-
-    const currentValue = get().currentTemp;
-
-    const sendData = {
-      ...currentValue,
-      templateName: name,
-      description: description,
-      elements: elements,
-    };
-
-    set({
-      templates: temp,
-      currentTemp: null,
-      isEditTemp: false,
-      elements: [],
-    });
-
-    await updateDoc(doc(db, "templates", templateId), sendData).then(() => {
-      router.navigate({ to: "/template" });
-    });
   },
 }));

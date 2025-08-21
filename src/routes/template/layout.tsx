@@ -1,6 +1,7 @@
-import { createRoute, Navigate, Outlet } from "@tanstack/react-router";
+import { createRoute, Navigate } from "@tanstack/react-router";
 import { Root } from "../__root";
 import Navbar from "./_Component/navbar";
+import { Template } from "./template";
 
 export const LayoutTemplate = createRoute({
   getParentRoute: () => Root,
@@ -11,8 +12,8 @@ export const LayoutTemplate = createRoute({
 
     return (
       <>
-        <Navbar templateLength={0} />
-        <Outlet />
+        <Navbar />
+        <Template />
       </>
     );
   },

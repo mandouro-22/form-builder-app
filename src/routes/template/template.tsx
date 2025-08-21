@@ -1,5 +1,3 @@
-import { createRoute, Link, useNavigate } from "@tanstack/react-router";
-import { LayoutTemplate } from "./layout";
 import { formatDate } from "../../lib/format-date-";
 import {
   EyeIcon,
@@ -11,32 +9,26 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import Model from "../../components/model";
 import { auth, db } from "../../firebase";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useFormStore, type TempData } from "../../store/store";
 import { debounce } from "lodash";
+import { Link, useNavigate } from "@tanstack/react-router";
 
-export const Template = createRoute({
-  getParentRoute: () => LayoutTemplate,
-  path: "/",
-  component: Page,
-});
-
-function Page() {
+export const Template = () => {
+  const {
+    addPreview,
+    templates,
+    getTemplate,
+    deleteTemp,
+    selectTemplate,
+    startEditTemp,
+  } = useFormStore();
   const [open, setOpen] = useState<string | null>(null);
   const [search, setSearch] = useState<string>("");
-  const [temp, setTemp] = useState<TempData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [userId, setUserId] = useState<string>("");
   const navigate = useNavigate();
-  const { addPreview } = useFormStore();
 
   const handleClose = useCallback(() => {
     return setOpen(null);
@@ -48,10 +40,8 @@ function Page() {
     try {
       if (!userId && !id) return;
 
-      await deleteDoc(doc(db, "templates", id)).then(() => {
-        setTemp((prev) => prev.filter((item) => item.templateId !== id));
-        setOpen(null);
-      });
+      deleteTemp(id);
+      setOpen(null);
     } catch (error) {
       console.error(error);
     }
@@ -65,7 +55,7 @@ function Page() {
         setUserId(userId);
         const cacheKey = `${userId}-${search || ""}`;
         if (cacheRef.current.has(cacheKey)) {
-          setTemp(cacheRef.current.get(cacheKey) as TempData[]);
+          getTemplate(cacheRef.current.get(cacheKey) as TempData[]);
           setLoading(false);
           return;
         }
@@ -83,8 +73,8 @@ function Page() {
           templatesData.push(data);
         });
         cacheRef.current.set(cacheKey, templatesData);
-        console.log(templatesData);
-        setTemp(templatesData);
+        // setTemp(templatesData);
+        getTemplate(templatesData);
         setLoading(false);
       } else {
         setLoading(false);
@@ -97,7 +87,7 @@ function Page() {
     return () => {
       debounces();
     };
-  }, [search]);
+  }, [getTemplate, search]);
 
   return (
     <div
@@ -121,9 +111,9 @@ function Page() {
               Loading Templates...
             </h1>
           </div>
-        ) : temp && temp.length > 0 ? (
+        ) : templates && templates.length > 0 ? (
           <div className="grid gird-cols-1 sm:grid-cols-2 md:grid-col-3 lg:grid-cols-4 gap-4 my-6">
-            {temp.map((temp) => (
+            {templates.map((temp) => (
               <div
                 className="border border-gray-200 shadow rounded-lg px-4 py-6"
                 key={temp.id}>
@@ -146,12 +136,15 @@ function Page() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 mt-6">
-                  <Link
-                    to="/template"
-                    className="flex-1 border border-gray-300 h-7 text-gray-700 flex items-center justify-center gap-2 font-medium rounded-md py-0.5 text-sm">
+                  <button
+                    className="flex-1 border border-gray-300 h-7 text-gray-700 flex items-center justify-center gap-2 font-medium rounded-md py-0.5 text-sm"
+                    onClick={() => {
+                      selectTemplate(temp.templateId);
+                      startEditTemp();
+                    }}>
                     <PenBoxIcon className="size-4" />
                     Edit
-                  </Link>
+                  </button>
                   <button
                     type="button"
                     className="border border-gray-300 h-7 w-8 rounded-md flex items-center justify-center"
@@ -203,4 +196,4 @@ function Page() {
       ) : null}
     </div>
   );
-}
+};
