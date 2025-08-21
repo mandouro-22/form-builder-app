@@ -161,10 +161,15 @@ function SaveOrUpdateTemplateModel({ onClose, mode }: SaveTemplateModelProps) {
 }
 
 export default function Navbar() {
-  const { clearElements, setProperties, elements, addPreview, isEditTemp } =
-    useFormStore();
+  const {
+    clearElements,
+    setProperties,
+    elements,
+    addPreview,
+    isEditTemp,
+    exportAsJSON,
+  } = useFormStore();
   const [open, setOpen] = useState(false);
-  console.log(isEditTemp);
   const setting = [
     {
       id: 1,
@@ -198,6 +203,67 @@ export default function Navbar() {
     },
   ];
 
+  const { importAsJSON } = useFormStore();
+
+  const handleExportJSON = () => {
+    const jsonString = exportAsJSON();
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `form-template-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      console.error("No file selected");
+      return;
+    }
+    if (!file.type.includes("json")) {
+      console.error("Please select a JSON file");
+      return;
+    }
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const json = e.target?.result;
+      if (typeof json === "string") {
+        importAsJSON(json);
+      }
+    };
+
+    reader.readAsText(file);
+  };
+
+  const handleItemClick = (id: number) => {
+    switch (id) {
+      case 1:
+        setProperties();
+        break;
+      case 2:
+        addPreview(elements);
+        break;
+      case 3:
+        setOpen(true);
+        break;
+      case 4:
+        handleExportJSON();
+        break;
+      case 6:
+        clearElements();
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <nav className="bg-white shadow-sm flex items-center flex-1 w-full border-b border-gray-200">
       <div className="w-full px-6 py-2 flex items-center justify-between">
@@ -220,27 +286,36 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-6">
-          {setting.map((item) => (
-            <div
-              key={item.id}
-              className={`flex items-center gap-2 cursor-pointer ${
-                item.id === 6 ? "text-red-600 font-medium" : null
-              }`}
-              onClick={() =>
-                item.id === 6
-                  ? clearElements()
-                  : item.id === 1
-                  ? setProperties()
-                  : item.id === 2
-                  ? addPreview(elements)
-                  : item.id === 3
-                  ? setOpen(true)
-                  : null
-              }>
-              {item.icon}
-              <h4 className="text-base ">{item.name}</h4>
-            </div>
-          ))}
+          {setting.map((item) =>
+            item.name === "Import" ? (
+              <div
+                key={item.id}
+                className={`flex items-center gap-2 cursor-pointer`}>
+                {item.icon}
+                <label
+                  htmlFor={String(item.id)}
+                  className="text-base cursor-pointer">
+                  {item.name}
+                </label>
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={handleImportJSON}
+                  id={String(item.id)}
+                />
+              </div>
+            ) : (
+              <div
+                key={String(item.id)}
+                className={`flex items-center gap-2 cursor-pointer ${
+                  item.id === 6 ? "text-red-600 font-medium" : null
+                }`}
+                onClick={() => handleItemClick(item.id)}>
+                {item.icon}
+                <h4 className="text-base ">{item.name}</h4>
+              </div>
+            )
+          )}
         </div>
       </div>
 

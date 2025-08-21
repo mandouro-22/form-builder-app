@@ -1,0 +1,48 @@
+{
+  "templateName": "Untitled Template",
+  "description": "",
+  "elements": [
+    {
+      "name": "input_1755801621793",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "placeholder": "Enter input...",
+      "label": "Input",
+      "is_required": false,
+      "type": "input",
+      "id": "lqya01"
+    },
+    {
+      "name": "textarea_1755801622706",
+      "position": {
+        "x": 0,
+        "y": 80
+      },
+      "placeholder": "Enter textarea...",
+      "label": "Textarea",
+      "is_required": false,
+      "type": "textarea",
+      "id": "lqyape"
+    },
+    {
+      "name": "checkbox_1755801623716",
+      "position": {
+        "x": 0,
+        "y": 160
+      },
+      "placeholder": "Enter checkbox...",
+      "label": "Checkbox",
+      "is_required": false,
+      "type": "checkbox",
+      "options": [
+        "option 1",
+        "option 2",
+        "option 3"
+      ],
+      "id": "lqybhg"
+    }
+  ],
+  "exportedAt": "2025-08-21T18:40:28.322Z"
+}

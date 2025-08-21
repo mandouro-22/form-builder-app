@@ -1,7 +1,16 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, DownloadIcon } from "lucide-react";
+import { exportFormAsPDF, useFormStore } from "../../../store/store";
 
 export default function Navbar() {
+  const { preview, currentTemp } = useFormStore();
+
+  const handleExportPDF = () => {
+    if (preview && preview.length > 0) {
+      exportFormAsPDF(preview, currentTemp?.templateName);
+    }
+  };
+
   return (
     <nav className="bg-white shadow-sm flex items-center flex-1 w-full border-b border-gray-200">
       <div className="w-full px-6 py-2 flex items-center justify-between">
@@ -18,7 +27,10 @@ export default function Navbar() {
           </div>
         </div>
 
-        <button className="flex items-center gap-4 btn border border-gray-200 bg-white">
+        <button
+          onClick={handleExportPDF}
+          disabled={!preview || preview.length === 0}
+          className="flex items-center gap-4 btn border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
           <DownloadIcon className="size-4" />
           <span className="text-sm font-medium">Export PDF</span>
         </button>
