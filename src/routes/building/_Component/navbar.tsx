@@ -144,13 +144,13 @@ function SaveOrUpdateTemplateModel({ onClose, mode }: SaveTemplateModelProps) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="button px-4 py-2 text-sm cursor-pointer font-medium bg-cyan-600 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
-              {mode === "create"
-                ? isSubmitting
+              className="button px-4 py-2 text-sm font-medium bg-cyan-600 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+              {isSubmitting
+                ? mode === "create"
                   ? "Saving..."
-                  : "Save Template"
-                : isSubmitting
-                ? "Updateing..."
+                  : "Updating..."
+                : mode === "create"
+                ? "Save Template"
                 : "Update Template"}
             </button>
           </div>
@@ -322,7 +322,7 @@ export default function Navbar() {
       {open ? (
         <SaveOrUpdateTemplateModel
           onClose={() => setOpen(false)}
-          mode={"update"}
+          mode={isEditTemp ? "update" : "create"}
         />
       ) : null}
     </nav>

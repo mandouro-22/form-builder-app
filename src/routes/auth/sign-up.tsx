@@ -12,6 +12,7 @@ import {
 import { createRoute, Link, useNavigate } from "@tanstack/react-router";
 import { doc, setDoc } from "firebase/firestore";
 import { Loader2Icon } from "lucide-react";
+import { getFirebaseAuthErrorMessage } from "../../lib/firebase-errors";
 
 export const SignUp = createRoute({
   getParentRoute: () => AuthLayout,
@@ -21,6 +22,7 @@ export const SignUp = createRoute({
 
 function Page() {
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -64,7 +66,7 @@ function Page() {
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      console.error("Registration error:", error.message || error);
+      setError(getFirebaseAuthErrorMessage(error.code));
     } finally {
       setLoading(false);
     }
@@ -104,6 +106,8 @@ function Page() {
               )}
             </div>
           ))}
+
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
           <button
             type="submit"

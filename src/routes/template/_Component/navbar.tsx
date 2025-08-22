@@ -1,9 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, PlusIcon } from "lucide-react";
-import { useFormStore } from "../../../store/store";
 
 export default function Navbar() {
-  const { templates } = useFormStore();
   return (
     <nav className="bg-white shadow-sm flex items-center flex-1 w-full border-b border-gray-200">
       <div className="container mx-auto px-4 py-2 flex items-center justify-between">
@@ -17,11 +15,6 @@ export default function Navbar() {
 
           <div className="mr-4">
             <h1 className="font-semibold text-xl">Form Template</h1>
-          </div>
-
-          <div className="hidden sm:flex items-center gap-1 text-xs text-gray-900 font-medium">
-            <span>{templates.length}</span>
-            <p>templates</p>
           </div>
         </div>
 

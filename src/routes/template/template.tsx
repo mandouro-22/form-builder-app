@@ -1,6 +1,7 @@
 import { formatDate } from "../../lib/format-date-";
 import {
   EyeIcon,
+  ListFilterIcon,
   PenBoxIcon,
   PlusIcon,
   SearchIcon,
@@ -9,7 +10,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import Model from "../../components/model";
 import { auth, db } from "../../firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { useFormStore, type TempData } from "../../store/store";
 import { debounce } from "lodash";
@@ -25,16 +26,20 @@ export const Template = () => {
     startEditTemp,
   } = useFormStore();
   const [open, setOpen] = useState<string | null>(null);
+  const [toggle, setToggle] = useState<boolean>(false);
+  const [filter, setFilter] = useState<"templateName" | "createdAt" | null>(
+    null
+  );
   const [search, setSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [userId, setUserId] = useState<string>("");
+  const cacheRef = useRef<Map<string, TempData[]>>(new Map());
+
   const navigate = useNavigate();
 
   const handleClose = useCallback(() => {
     return setOpen(null);
   }, []);
-
-  const cacheRef = useRef<Map<string, TempData[]>>(new Map());
 
   const OnDelete = async (id: string) => {
     try {
@@ -47,64 +52,125 @@ export const Template = () => {
     }
   };
 
+  console.log(cacheRef);
+
   useEffect(() => {
-    setLoading(true);
     const unSubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
+      try {
+        setLoading(true);
+        if (!user) return;
         const userId = user.uid;
         setUserId(userId);
-        const cacheKey = `${userId}-${search || ""}`;
-        if (cacheRef.current.has(cacheKey)) {
-          getTemplate(cacheRef.current.get(cacheKey) as TempData[]);
-          setLoading(false);
-          return;
-        }
-
-        const queryConstraints = [where("userId", "==", userId)];
-        if (search) {
-          queryConstraints.push(where("templateName", "==", search));
-        }
-
-        const q = query(collection(db, "templates"), ...queryConstraints);
-        const querySnapshot = await getDocs(q);
-        const templatesData: TempData[] = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data() as TempData;
-          templatesData.push(data);
-        });
-        cacheRef.current.set(cacheKey, templatesData);
-        // setTemp(templatesData);
-        getTemplate(templatesData);
+      } catch (error) {
+        console.error(error);
+      } finally {
         setLoading(false);
-      } else {
-        setLoading(false);
-        console.error("no user sign in");
       }
     });
+    return () => unSubscribe();
+  }, []);
 
-    const debounces = debounce(unSubscribe, 500);
+  useEffect(() => {
+    if (!userId) return;
+    const FetchTemp = async () => {
+      setLoading(true);
+      const cacheKey = `${userId}-${filter}-${search || ""}`;
+      if (cacheRef.current.has(cacheKey)) {
+        getTemplate(cacheRef.current.get(cacheKey) as TempData[]);
+        setLoading(false);
+        return;
+      }
+
+      const queryConstraints = [where("userId", "==", userId)];
+      const order = [];
+      if (filter) {
+        if (filter) {
+          if (filter === "createdAt") {
+            order.push(orderBy("createdAt", "asc"));
+          } else {
+            order.push(orderBy("templateName", "asc"));
+          }
+        }
+      }
+      if (search) {
+        queryConstraints.push(where("templateName", "==", search));
+      }
+      console.log(order);
+      const q = query(
+        collection(db, "templates"),
+        ...queryConstraints,
+        ...order
+      );
+
+      const querySnapshot = await getDocs(q);
+      const templatesData: TempData[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as TempData;
+        templatesData.push(data);
+      });
+      cacheRef.current.set(cacheKey, templatesData);
+      getTemplate(templatesData);
+      setLoading(false);
+    };
+
+    const debounces = debounce(FetchTemp, 500);
+    debounces();
 
     return () => {
-      debounces();
+      debounces.cancel?.();
     };
-  }, [getTemplate, search]);
+  }, [filter, getTemplate, search, userId]);
 
   return (
     <div
       className="bg-white py-12 px-4"
       style={{ height: "calc(100vh - 58px)" }}>
-      <div className="container mx-auto">
-        <div className="relative max-w-md">
-          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <input
-            type="search"
-            placeholder="Search templates name..."
-            name="search"
-            className="input pl-10 h-9 w-full"
-            value={search}
-            onChange={(e) => setSearch(e.target.value.toLowerCase())}
-          />
+      <div className="container mx-auto" onClick={() => setToggle(false)}>
+        <div className="flex items-center justify-between w-full gap-3">
+          {/* Search Input */}
+          <div className="relative max-w-md flex-1">
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <input
+              type="search"
+              placeholder="Search templates name..."
+              name="search"
+              className="input pl-10 h-9 w-full"
+              value={search}
+              onChange={(e) => setSearch(e.target.value.toLowerCase())}
+            />
+          </div>
+
+          <div className="relative">
+            <div
+              className="flex items-center gap-2 p-1.5 px-3 rounded-lg border border-gray-200 cursor-pointer"
+              onClick={(e) => {
+                setToggle(!toggle);
+                e.stopPropagation();
+              }}>
+              <ListFilterIcon className="text-gray-800 size-4" />
+              <p className="text-gray-900 text-sm">Filter</p>
+            </div>
+
+            <div
+              className={`absolute right-0 mt-2 bg-white shadow border-gray-200 rounded-sm w-40 overflow-hidden transition-all duration-300 ${
+                toggle
+                  ? "translate-y-0 opacity-100 border"
+                  : "-translate-y-2 opacity-0 pointer-events-none"
+              }`}>
+              <div
+                className="flex items-center gap-2 p-1.5 hover:bg-gray-100 rounded-sm cursor-pointer"
+                onClick={() => setFilter("templateName")}>
+                <p className="text-sm text-gray-700">By Name</p>
+              </div>
+              <div
+                className="flex items-center gap-2 p-1.5 hover:bg-gray-100 rounded-sm cursor-pointer"
+                onClick={() => setFilter("createdAt")}>
+                <p className="text-sm text-gray-700">By Created</p>
+              </div>
+            </div>
+          </div>
         </div>
+
         {loading ? (
           <div className="my-4">
             <h1 className="text-2xl md:text-4xl font-bold text-gray-800">

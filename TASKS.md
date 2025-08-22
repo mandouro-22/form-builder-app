@@ -23,16 +23,10 @@
 - [x] Save form as a template from the Create page and store it in a database
 - [x] Templates page: Read templates from the database, enable search, delete/modify Actual
 - [x] Open a template for editing in the builder page (Edit existing template)
-- [ ] Export the template: as a JSON file and generate a PDF
-- [ ] Reorder elements within the canvas by dragging (Sort/Reorder within Canvas)
-- [ ] Toggle the "Preview/Properties" mode if `is_preview` is intended, and show the full preview of the template
-- [ ] A button to clear the entire canvas with a confirmation, and a button to deselect the element
-- [ ] Make the template counter in the `Navbar` dynamic instead of `0`
-- [ ] Make template search efficient in the templates page
-- [ ] Improve accessibility (labels, aria-\*, color contrast)
-- [ ] Set up a local and secure `.env` environment for Firebase values and document it in the `README`
-- [ ] Core tests for the repository, critical components, and CI setup
-- [ ] Stable deployment and production (Vercel) settings with environment keys
+- [x] Export the template: as a JSON file and generate a PDF
+- [x] Toggle the "Preview/Properties" mode if `is_preview` is intended, and show the full preview of the template
+- [x] A button to clear the entire canvas with a confirmation, and a button to deselect the element
+- [x] Make template search efficient in the templates page
 
 #### Notes
 

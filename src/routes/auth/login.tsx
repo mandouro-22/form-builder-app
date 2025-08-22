@@ -8,6 +8,7 @@ import { Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase";
+import { getFirebaseAuthErrorMessage } from "../../lib/firebase-errors";
 
 export const Login = createRoute({
   getParentRoute: () => AuthLayout,
@@ -17,6 +18,7 @@ export const Login = createRoute({
 
 function Page() {
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -42,7 +44,7 @@ function Page() {
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      console.error("Login error:", error.message || error);
+      setError(getFirebaseAuthErrorMessage(error.code));
     } finally {
       setLoading(false);
     }
@@ -82,6 +84,8 @@ function Page() {
               )}
             </div>
           ))}
+
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
           <button
             type="submit"
