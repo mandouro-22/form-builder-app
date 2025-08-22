@@ -47,8 +47,6 @@ function SaveOrUpdateTemplateModel({ onClose, mode }: SaveTemplateModelProps) {
 
   const onSubmit = async (data: TemplateFormData) => {
     try {
-      console.log("Saving template:", data);
-
       if (mode === "create") {
         await addTemplate(data.templateName, data.description);
       } else if (mode === "update") {

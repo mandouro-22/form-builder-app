@@ -254,7 +254,7 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
   exportAsJSON() {
     const { elements, currentTemp } = get();
     const exportElements = elements || currentTemp?.elements || [];
-    console.log(exportElements);
+
     const exportData = {
       templateName: currentTemp?.templateName || "Untitled Template",
       description: currentTemp?.description || "",
@@ -269,7 +269,6 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
     try {
       const data = JSON.parse(json);
       if (data && Array.isArray(data.elements)) {
-        console.log(data);
         set({
           elements: data.elements,
           currentTemp: data,

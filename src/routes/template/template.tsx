@@ -52,8 +52,6 @@ export const Template = () => {
     }
   };
 
-  console.log(cacheRef);
-
   useEffect(() => {
     const unSubscribe = onAuthStateChanged(auth, async (user) => {
       try {
@@ -95,7 +93,7 @@ export const Template = () => {
       if (search) {
         queryConstraints.push(where("templateName", "==", search));
       }
-      console.log(order);
+
       const q = query(
         collection(db, "templates"),
         ...queryConstraints,
