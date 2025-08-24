@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   DownloadIcon,
   EyeIcon,
+  Menu,
   SaveIcon,
   SettingsIcon,
   TrashIcon,
@@ -10,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { useFormStore } from "../../../store/store";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -71,7 +72,7 @@ function SaveOrUpdateTemplateModel({ onClose, mode }: SaveTemplateModelProps) {
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       onClick={onClose}>
       <div
-        className="bg-white rounded-lg w-full max-w-md p-6 mx-4 relative"
+        className="bg-white rounded-lg w-[90%] sm:w-full sm:max-w-md p-6 mx-4 relative"
         onClick={(e) => e.stopPropagation()}>
         <button
           onClick={onClose}
@@ -166,8 +167,11 @@ export default function Navbar() {
     addPreview,
     isEditTemp,
     exportAsJSON,
+    importAsJSON,
+    closeEditTemp,
   } = useFormStore();
   const [open, setOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const setting = [
     {
       id: 1,
@@ -201,9 +205,7 @@ export default function Navbar() {
     },
   ];
 
-  const { importAsJSON } = useFormStore();
-
-  const handleExportJSON = () => {
+  const handleExportJSON = useCallback(() => {
     const jsonString = exportAsJSON();
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -215,7 +217,7 @@ export default function Navbar() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
+  }, [exportAsJSON]);
 
   const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -240,82 +242,168 @@ export default function Navbar() {
     reader.readAsText(file);
   };
 
-  const handleItemClick = (id: number) => {
-    switch (id) {
-      case 1:
-        setProperties();
-        break;
-      case 2:
-        addPreview(elements);
-        break;
-      case 3:
-        setOpen(true);
-        break;
-      case 4:
-        handleExportJSON();
-        break;
-      case 6:
-        clearElements();
-        break;
-      default:
-        break;
-    }
-  };
+  const handleItemClick = useCallback(
+    (id: number) => {
+      switch (id) {
+        case 1:
+          setProperties();
+          break;
+        case 2:
+          addPreview(elements);
+          break;
+        case 3:
+          setOpen(true);
+          break;
+        case 4:
+          handleExportJSON();
+          break;
+        case 6:
+          clearElements();
+          closeEditTemp();
+          break;
+        default:
+          break;
+      }
+    },
+    [
+      addPreview,
+      clearElements,
+      elements,
+      handleExportJSON,
+      setProperties,
+      closeEditTemp,
+    ]
+  );
 
   return (
-    <nav className="bg-white shadow-sm flex items-center flex-1 w-full border-b border-gray-200">
-      <div className="w-full px-6 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-x-2 md:gap-x-4">
-          <Link
-            to="/"
-            className="btn hidden text-sm bg-transparent hover:bg-gray-100 text-gray-900 font-semibold sm:flex items-center">
-            <ArrowLeft className="h-4" />
-            <span>Back</span>
-          </Link>
-
-          <div className="mr-4">
-            <h1 className="font-semibold text-xl">Form Template</h1>
+    <nav className="bg-white shadow-sm w-full border-b border-gray-200">
+      <div className="w-full px-4 sm:px-6 py-2">
+        <div className="flex items-center justify-between h-10">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <h1 className="font-semibold text-lg sm:text-xl">
+                Form Template
+              </h1>
+            </div>
+            <div className="hidden lg:ml-6 lg:flex lg:items-center space-x-4">
+              <Link
+                to="/"
+                onClick={() => {
+                  clearElements();
+                  closeEditTemp();
+                }}
+                className="text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium flex items-center">
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                <span>Back</span>
+              </Link>
+              <div className="flex items-center text-sm text-gray-700">
+                <span className="font-medium">{elements.length}</span>
+                <span className="ml-1">
+                  element{elements.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div className="hidden sm:flex items-center gap-1 text-xs text-gray-900 font-medium">
-            <span>{elements.length}</span>
-            <p>element</p>
+          {/* Desktop menu */}
+          <div className="hidden lg:flex items-center space-x-4">
+            {setting.map((item) =>
+              item.name === "Import" ? (
+                <div
+                  key={item.id}
+                  className="flex items-center text-sm text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md cursor-pointer">
+                  {item.icon}
+                  <label
+                    htmlFor={String(item.id)}
+                    className="ml-2 cursor-pointer">
+                    {item.name}
+                  </label>
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={handleImportJSON}
+                    id={String(item.id)}
+                  />
+                </div>
+              ) : (
+                <div
+                  key={String(item.id)}
+                  className={`flex items-center text-sm px-3 py-2 rounded-md cursor-pointer ${
+                    item.id === 6
+                      ? "text-red-600 hover:bg-red-50"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                  onClick={() => handleItemClick(item.id)}>
+                  {item.icon}
+                  <span className="ml-2">{item.name}</span>
+                </div>
+              )
+            )}
           </div>
-        </div>
 
-        <div className="flex items-center gap-6">
-          {setting.map((item) =>
-            item.name === "Import" ? (
-              <div
-                key={item.id}
-                className={`flex items-center gap-2 cursor-pointer`}>
-                {item.icon}
-                <label
-                  htmlFor={String(item.id)}
-                  className="text-base cursor-pointer">
-                  {item.name}
-                </label>
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={handleImportJSON}
-                  id={String(item.id)}
-                />
-              </div>
-            ) : (
-              <div
-                key={String(item.id)}
-                className={`flex items-center gap-2 cursor-pointer ${
-                  item.id === 6 ? "text-red-600 font-medium" : null
-                }`}
-                onClick={() => handleItemClick(item.id)}>
-                {item.icon}
-                <h4 className="text-base ">{item.name}</h4>
-              </div>
-            )
-          )}
+          {/* Mobile menu button */}
+          <div className="-mr-2 flex lg:hidden">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none">
+              <span className="sr-only">Open main menu</span>
+              {mobileMenuOpen ? (
+                <X className="block h-6 w-6" />
+              ) : (
+                <Menu className="block h-6 w-6" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden transition-all duration-200">
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            <div className="flex items-center px-3 py-2 text-sm text-gray-700">
+              <span className="font-medium">
+                {elements.length} element{elements.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+            {setting.map((item) =>
+              item.name === "Import" ? (
+                <div
+                  key={item.id}
+                  className="flex items-center px-3 py-2 text-base text-gray-700 hover:bg-gray-100 rounded-md">
+                  {item.icon}
+                  <label
+                    htmlFor={`mobile-${item.id}`}
+                    className="ml-3 cursor-pointer">
+                    {item.name}
+                  </label>
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={handleImportJSON}
+                    id={`mobile-${item.id}`}
+                  />
+                </div>
+              ) : (
+                <div
+                  key={String(item.id)}
+                  className={`flex items-center px-3 py-2 text-base rounded-md ${
+                    item.id === 6
+                      ? "text-red-600 hover:bg-red-50"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                  onClick={() => {
+                    handleItemClick(item.id);
+                    setMobileMenuOpen(false);
+                  }}>
+                  {item.icon}
+                  <span className="ml-3">{item.name}</span>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      )}
 
       {open ? (
         <SaveOrUpdateTemplateModel

@@ -30,7 +30,7 @@ const FormElement = ({ id, icon: Icon, label }: Element) => {
       style={style}
       {...listeners}
       {...attributes}
-      className={`w-40 mr-auto flex items-center select-none justify-start gap-3 p-3 bg-white border-2  ${
+      className={`w-40 mr-auto flex items-center select-none justify-start gap-3 p-3 bg-white border-2 ${
         transform ? "border-blue-600" : "border-gray-300"
       } rounded-lg cursor-grab hover:shadow-md transition-shadow`}>
       <Icon className="h-5 w-5 text-gray-600" />

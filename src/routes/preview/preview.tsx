@@ -99,7 +99,7 @@ const FormElement = ({ element }: { element: FormElement }) => {
           </div>
         );
 
-      default: // Default to text input
+      default:
         return (
           <input
             type={element.type === "email" ? "email" : "text"}
@@ -128,8 +128,8 @@ const FormElement = ({ element }: { element: FormElement }) => {
 
 export default function Preview() {
   const { preview } = useFormStore();
-
-  if (!preview || preview.length === 0) {
+  console.log(preview);
+  if (!Array.isArray(preview) || preview.length === 0) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-58px)] bg-gray-50">
         <div className="text-center">

@@ -45,7 +45,9 @@ export const FormElementWrapper = memo(
         onClick={selectElementFN}>
         {active === type ? ButtonAction(type, id) : null}
         <div className="flex items-center gap-2">
-          <label htmlFor={name} className="font-semibold text-lg text-gray-900">
+          <label
+            htmlFor={name || id}
+            className="font-semibold text-lg text-gray-900">
             {label}
           </label>
           {is_required ? <span className="text-red-600 text-sm">*</span> : null}

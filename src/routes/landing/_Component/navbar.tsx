@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { FormInput } from "lucide-react";
 import AuthBtn from "../../../components/auth-btn";
 
@@ -12,11 +11,6 @@ export default function Navbar() {
           <h1 className="font-bold text-2xl">FormCraft</h1>
         </div>
         <div className="flex items-center gap-3">
-          <Link
-            to="/template"
-            className="btn bg-cyan-800 font-semibold text-white">
-            Template
-          </Link>
           <AuthBtn status={token ? "out" : "sign"} />
         </div>
       </div>

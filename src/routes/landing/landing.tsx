@@ -44,11 +44,16 @@ export default function Landing() {
             customize.
           </p>
 
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center gap-2">
             <Link
               to="/building"
               className="btn bg-gradient-to-tr from-cyan-500 via-cyan-700 to-cyan-800 text-white font-semibold">
               Start Building
+            </Link>
+            <Link
+              to="/template"
+              className="btn bg-transparent border text-cyan-800 hover:bg-cyan-800/10 font-semibold">
+              Templates
             </Link>
           </div>
         </div>

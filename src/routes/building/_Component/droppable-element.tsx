@@ -15,13 +15,20 @@ export default function DroppableElement() {
     color: isOver ? "green" : undefined,
   };
 
-  const { elements, selectElement, selectedElement, removeElement } =
-    useFormStore();
+  const {
+    elements = [],
+    selectElement,
+    selectedElement,
+    removeElement,
+    propertyStatus,
+  } = useFormStore();
 
   const ButtonAction = (type: string, id: string) =>
     active === type ? (
-      <div className="flex items-center justify-end gap-3 absolute right-4 top-1">
-        <div className="border border-gray-100/60 rounded-md shadow p-2 cursor-pointer hover:shadow-lg">
+      <div className="flex items-center justify-end gap-3 absolute right-4 top-1 ">
+        <div
+          className="border border-gray-100/60 rounded-md shadow p-2 cursor-pointer hover:shadow-lg"
+          onClick={() => propertyStatus(true)}>
           <Settings className="size-4" />
         </div>
         <div
@@ -38,16 +45,24 @@ export default function DroppableElement() {
       style={style}
       className="flex-1 h-full p-6 overflow-auto">
       <div className="border-2 border-dashed border-gray-300 min-h-full overflow-auto p-6 rounded-xl">
-        {elements.length > 0 ? (
-          RenderElements(
-            elements,
-            active,
-            setActive,
-            ButtonAction,
-            selectedElement,
-            selectElement
-          )
+        {Array.isArray(elements) && elements.length > 0 ? (
+          <RenderElements
+            elements={elements}
+            active={active}
+            setActive={setActive}
+            ButtonAction={ButtonAction}
+            selectedElement={selectedElement}
+            selectElement={selectElement}
+          />
         ) : (
+          // RenderElements(
+          //   elements,
+          //   active,
+          //   setActive,
+          //   ButtonAction,
+          //   selectedElement,
+          //   selectElement
+          // )
           <div className="flex items-center flex-col justify-center gap-y-2 h-64 text-gray-500">
             <h1 className="font-semibold text-lg">Drop form elements here</h1>
             <p className="text-sm">

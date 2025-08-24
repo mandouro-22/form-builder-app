@@ -46,37 +46,38 @@ export interface TempData {
 }
 
 interface FormBuilder {
-  elements: FormElement[];
   is_preview: boolean;
-  preview: FormElement[];
-  templates: TempData[];
-  selectedElement: FormElement | null;
-  currentTemp: TempData | null;
   isEditTemp: boolean;
+  templates: TempData[];
+  preview: FormElement[];
+  elements: FormElement[];
+  currentTemp: TempData | null;
+  selectedElement: FormElement | null;
+  exportAsPDF: () => void;
   startEditTemp: () => void;
   closeEditTemp: () => void;
-  selectTemplate: (templateId: string) => void;
-  updateTemp: (name: string, description: string, templateId: string) => void;
-  deleteTemp: (id: string) => void;
-  addElement: (element: FormElement) => void;
-  selectElement: (element: FormElement | null) => void;
-  removeElement: (id: string) => void;
   clearElements: () => void;
   setProperties: () => void;
-  updateElement: (id: string, updates: Partial<FormElement>) => void;
-  getTemplate: (tempDate: TempData[]) => void;
-  addTemplate: (name: string, description?: string) => void;
-  addPreview: (element: FormElement[]) => void;
   exportAsJSON: () => string;
+  deleteTemp: (id: string) => void;
+  removeElement: (id: string) => void;
   importAsJSON: (json: string) => void;
-  exportAsPDF: () => void;
+  propertyStatus: (value: boolean) => void;
+  addElement: (element: FormElement) => void;
+  getTemplate: (tempDate: TempData[]) => void;
+  selectTemplate: (templateId: string) => void;
+  addPreview: (element: FormElement[]) => void;
+  selectElement: (element: FormElement | null) => void;
+  addTemplate: (name: string, description?: string) => void;
+  updateElement: (id: string, updates: Partial<FormElement>) => void;
+  updateTemp: (name: string, description: string, templateId: string) => void;
 }
 
 export const useFormStore = create<FormBuilder>((set, get) => ({
   elements: [],
   selectedElement: null,
   currentTemp: null,
-  is_preview: true,
+  is_preview: false,
   preview: [],
   templates: [],
   isEditTemp: false,
@@ -98,7 +99,8 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
 
   selectTemplate(templateId) {
     const temp = get().templates.find((item) => item.templateId === templateId);
-
+    console.log(temp);
+    console.log(get().elements);
     set({
       currentTemp: temp,
       elements: temp?.elements,
@@ -117,6 +119,7 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
   },
 
   addPreview(value) {
+    if (!value) throw Error("value is not define");
     set({
       preview: value,
     });
@@ -158,6 +161,12 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
     set((state) => ({
       is_preview: !state.is_preview,
     }));
+  },
+
+  propertyStatus(value) {
+    set({
+      is_preview: value,
+    });
   },
 
   updateElement(id, updates) {
@@ -276,7 +285,7 @@ export const useFormStore = create<FormBuilder>((set, get) => ({
         });
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   },
 
